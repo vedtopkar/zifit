@@ -1,5 +1,7 @@
 var express = require('express');
 var router = express.Router();
+var util = require('util');
+var spawn = require('child_process').spawn;
 
 /* GET home page. */
 router.get('/', function(req, res) {
@@ -30,9 +32,24 @@ router.get('/nuclease', function(req, res){
 
 /* POST nuclease tool page. */
 router.post('/nuclease', function(req, res){
-    console.log('test');
-    console.log(req.body);
-    res.send('Successfully POSTed');
+    console.log('boop');
+    var command = spawn('./cas-offinder', ['input.txt', 'G', 'out.txt'], { cwd: './analysis/cas-offinder-master'});
+
+    command.stdout.on('data', function(data){
+        res.write(data);
+    });
+
+    command.stderr.on('data', function(data){
+        console.log('stderr: ' + data);
+    });
+
+    command.on('exit', function(code){
+        if(code !== 0)
+            res.write('child process exited with code: ' + code);
+        res.end();
+    });
+
+
 });
 
 module.exports = router;

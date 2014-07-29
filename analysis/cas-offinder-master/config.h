@@ -1,0 +1,20 @@
+#define HAVE_DIRENT_H
+/* #undef HAVE_CL_HPP */
+/* #undef BUILD_FOR_SNUCL */
+
+#ifdef BUILD_FOR_SNUCL
+#define CL_USE_DEPRECATED_OPENCL_1_1_APIS
+#define CL_USE_DEPRECATED_OPENCL_1_0_APIS
+#endif
+
+#ifdef HAVE_DIRENT_H
+#include <dirent.h>
+#else
+#include "ext/dirent.h"
+#endif
+
+#ifdef HAVE_CL_HPP
+#include <CL/cl.hpp>
+#else
+#include "ext/cl.hpp"
+#endif
