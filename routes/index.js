@@ -33,11 +33,21 @@ router.get('/nuclease', function(req, res){
 
 /* POST nuclease tool page. */
 router.post('/nuclease', function(req, res){
-    var seq = req.body.seq.replace(/(\r\n|\n|\r)/gm,"").toUpperCase();
+    console.log(req.body);
+    var options = req.body.options;
+    var seq = req.body.target_sequence;
+    var PAM_sequence = req.body.PAM_sequence;
+    var gRNA_length = req.body.gRNA_length;
+
+    seq = seq.replace(/(\r\n|\n|\r)/gm,"").toUpperCase();
+
+    console.log(seq, gRNA_length, PAM_sequence);
+
     if(!seqIsValidSeq(seq)){
-        res.send('Invalid sequence. :(');
+        res.send({error: true, message: 'Invalid sequence. :('});
     }
-    var results = JSON.stringify(findCandiateSequences(seq, req.body.length, req.body.PAM.toUpperCase()));
+    var results = JSON.stringify(findCandiateSequences(seq, gRNA_length, PAM_sequence));
+    results.error = false;
     res.send(results);
 
     // OFF-SITE CODE DOWN BELOW
