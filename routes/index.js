@@ -46,9 +46,17 @@ router.post('/nuclease', function(req, res){
     if(!seqIsValidSeq(seq)){
         res.send({error: true, message: 'Invalid sequence. :('});
     }
-    var results = JSON.stringify(findCandiateSequences(seq, gRNA_length, PAM_sequence));
+
+
+    var results = findCandidateSequences(seq, gRNA_length, PAM_sequence);
+
+    if(options.require_5G){
+        // Strip out the candidates that don't meet some criteria
+        results = filterForLeadingG(results);
+    }
+
     results.error = false;
-    res.send(results);
+    res.send(JSON.stringify(results));
 
     // OFF-SITE CODE DOWN BELOW
     // var command = spawn('./cas-offinder', ['input.txt', 'G', 'out.txt'], { cwd: './analysis/cas-offinder-master'});
@@ -73,16 +81,17 @@ router.post('/nuclease', function(req, res){
 
 // Takes a sequence, the desired length of the candidates,
 // and the PAM sequence, and returns an array of start indices.
-function findCandiateSequences(seq, length, PAM){
+function findCandidateSequences(seq, length, PAM){
     var regex = generateMixedBaseRegex(PAM);
     var match;
     var results = [];
     var currentStrand = '+';
+    var matchSeq;
 
     while((match = regex.exec(seq))){
-        var matchSeq = seq.substring(match.index - length + PAM.length, match.index + PAM.length);
+        matchSeq = seq.substring(match.index - length + PAM.length, match.index + PAM.length);
         if(match.index > (length - PAM.length)){
-            results.push({index: match.index, seq: matchSeq, strand: currentStrand});
+            results.push({index: match.index, seq: matchSeq, strand: currentStrand, gc_content: getGCContent(matchSeq)});
         }
     }
 
@@ -92,13 +101,11 @@ function findCandiateSequences(seq, length, PAM){
     console.log(seq);
 
     while((match = regex.exec(seq))){
+        matchSeq = seq.substring(match.index - length + PAM.length, match.index + PAM.length);
         if(match.index > (length - PAM.length)){
-            results.push({index: match.index, seq: seq.substring(match.index - length + PAM.length, match.index + PAM.length), strand: currentStrand});
+            results.push({index: match.index, seq: matchSeq, strand: currentStrand, gc_content: getGCContent(matchSeq)});
         }
     }
-
-    // Strip out the candidates that don't meet some criteria
-    results = filterForLeadingG(results);
 
     return results;
 }
@@ -147,6 +154,19 @@ function generateMixedBaseRegex(seq){
         }
     }
     return new RegExp(regexString, 'g');
+}
+
+
+// Given a seq, returns its GC content as a float with 1 decimal
+function getGCContent(seq){
+    var length = seq.length;
+    var count = 0;
+    for(var i = 0; i < length; i++){
+        if(seq[i] === 'G' || seq[i] === 'C'){
+            count++;
+        }
+    }
+    return (count/length).toFixed(2);
 }
 
 // Takes an array of sequence objects and returns an array of sequence objects that satisfy
