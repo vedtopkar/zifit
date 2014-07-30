@@ -34,6 +34,9 @@ router.get('/nuclease', function(req, res){
 /* POST nuclease tool page. */
 router.post('/nuclease', function(req, res){
     var seq = req.body.seq.replace(/(\r\n|\n|\r)/gm,"").toUpperCase();
+    if(!seqIsValidSeq(seq)){
+        res.send('Invalid sequence. :(');
+    }
     var results = JSON.stringify(findCandiateSequences(seq, req.body.length, req.body.PAM.toUpperCase()));
     res.send(results);
 
@@ -61,14 +64,15 @@ router.post('/nuclease', function(req, res){
 // Takes a sequence, the desired length of the candidates,
 // and the PAM sequence, and returns an array of start indices.
 function findCandiateSequences(seq, length, PAM){
-    var regex = new RegExp(PAM, "g");
+    var regex = generateMixedBaseRegex(PAM);
     var match;
     var results = [];
     var currentStrand = '+';
 
     while((match = regex.exec(seq))){
+        var matchSeq = seq.substring(match.index - length + PAM.length, match.index + PAM.length);
         if(match.index > (length - PAM.length)){
-            results.push({index: match.index, seq: seq.substring(match.index - length + PAM.length, match.index + PAM.length), strand: currentStrand});
+            results.push({index: match.index, seq: matchSeq, strand: currentStrand});
         }
     }
 
@@ -83,7 +87,81 @@ function findCandiateSequences(seq, length, PAM){
         }
     }
 
+    // Strip out the candidates that don't meet some criteria
+    results = filterForLeadingG(results);
+
     return results;
+}
+
+function generateMixedBaseRegex(seq){
+    var length = seq.length;
+    var regexString = '';
+    for(var i = 0; i < length; i++){
+        if(allowedSeqCharacters.indexOf(seq[i]) < 0){
+            var block;
+            switch(seq[i]){
+                case 'B':
+                    block = '[CGT]';
+                    break;
+                case 'D':
+                    block = '[AGT]';
+                    break;
+                case 'H':
+                    block = '[ACT]';
+                    break;
+                case 'V':
+                    block = '[ACG]';
+                    break;
+                case 'R':
+                    block = '[AG]';
+                    break;
+                case 'Y':
+                    block = '[CT]';
+                    break;
+                case 'M':
+                    block = '[GT]';
+                    break;
+                case 'S':
+                    block = '[AC]';
+                    break;
+                case 'W':
+                    block = '[AT]';
+                    break;
+                case 'N':
+                    block = '[ATCG]';
+                    break;
+            }
+            regexString += block;
+        }else{
+            regexString += seq[i];
+        }
+    }
+    return new RegExp(regexString, 'g');
+}
+
+// Takes an array of sequence objects and returns an array of sequence objects that satisfy
+// the criteria of having a leading G
+function filterForLeadingG(seqs){
+    var length = seqs.length;
+    var results = [];
+    for(var i = 0; i < length; i++){
+        if(seqs[i].seq[0] == 'G'){
+            results.push(seqs[i]);
+        }
+    }
+    return results;
+}
+
+var allowedSeqCharacters = ['A', 'T', 'G', 'C'];
+
+function seqIsValidSeq(seq){
+    var length = seq.length;
+    for(var i = 0; i < length; i++){
+        if(allowedSeqCharacters.indexOf(seq[i]) < 0){
+            return false;
+        }
+    }
+    return true;
 }
 
 var reverseComplementReference = {'A': 'T', 'T': 'A', 'G': 'C', 'C': 'G'};
@@ -91,7 +169,7 @@ var reverseComplementReference = {'A': 'T', 'T': 'A', 'G': 'C', 'C': 'G'};
 function reverseComplement(seq){
     var result = '';
     var length = seq.length;
-    for(var i = length; i > 0; i--){
+    for(var i = length - 1; i > 0; i--){
         result += reverseComplementReference[seq[i]];
     }
     return result;

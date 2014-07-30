@@ -15,5 +15,6 @@
     "morgan": "~1.0.0",
     "nedb": "*",
     "static-favicon": "~1.0.0"
-  }
+  },
+  "devDependencies": {}
 }
