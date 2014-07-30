@@ -1,5 +1,5 @@
 body {
-  padding: 50px;
+  padding: 70px 50px 0 50px;
   font: 14px "Lucida Grande", Helvetica, Arial, sans-serif;
 }
 
@@ -7,7 +7,6 @@ a {
   color: #00B7FF;
 }
 
-.zifit-body {
-    color: red;
-    top: 200px;
+.zifit-body{
+    
 }

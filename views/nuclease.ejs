@@ -1,0 +1,45 @@
+<div ng-app="nucleaseSubmit" ng-controller="submitFormController">
+  <form class="form-horizontal" role="form">
+    <div class="form-group">
+      <label for="inputSeq" class="col-sm-2 control-label">Target sequence</label>
+      <div class="col-sm-10">
+        <textarea class="form-control" rows="4" ng-model="data.target_sequence"></textarea>
+        <span class="help-block">(FASTA format is supported).</span>
+      </div>
+    </div>
+    <div class="form-group">
+      <label for="inputEmail3" class="col-sm-2 control-label">gRNA Length:</label>
+      <div class="col-sm-10">
+        <input ng-model="data.gRNA_length" type="number" min="15" max="20" class="form-control" id="inputEmail3" placeholder="" value="20">
+      </div>
+    </div>
+    <div class="form-group">
+      <label for="inputPassword3" class="col-sm-2 control-label">PAM Sequence</label>
+      <div class="col-sm-10">
+        <select ng-model="data.PAM_sequence" class="form-control">
+          <option>NGG</option>
+          <option>NNAGAA</option>
+          <option>NNNNGANN</option>
+        </select>
+      </div>
+    </div>
+    <div class="form-group">
+      <div class="col-sm-offset-2 col-sm-10">
+        <label>Options</label>
+        <div class="checkbox">
+          <label>
+            <input ng-model="options.require_5G" type="checkbox"> Require 5' G
+          </label>
+        </div>
+      </div>
+    </div>
+    <div class="form-group">
+      <div class="col-sm-offset-2 col-sm-10">
+        <div ng-show="error.length > 0" class="alert alert-danger" role="alert">{{ error }}</div>
+        <button ng-click="submit()" type="submit" class="btn btn-success">Identify Target Sites</button>
+      </div>
+    </div>
+  </form>
+  Data: {{ data }}
+  Options: {{ options }}
+</div>
