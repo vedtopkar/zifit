@@ -31,6 +31,11 @@
             <input ng-model="data.options.require_5G" type="checkbox"> Require 5' G
           </label>
         </div>
+        <div class="checkbox">
+          <label>
+            <input ng-model="data.options.require_5GG" type="checkbox"> Require 5' GG
+          </label>
+        </div>
       </div>
     </div>
     <div class="form-group">
@@ -40,8 +45,8 @@
       </div>
     </div>
   </form>
-<!--   Data: {{ data }}
-  Options: {{ data.options }} -->
+  Data: {{ data }}
+  Options: {{ data.options }}
   <br/>
 <table ng-table="resultsTable" class="table">
   <tr ng-repeat="result in results">
@@ -51,5 +56,5 @@
     <td data-title="'GC Content'">{{result.gc_content}}</td>
   </tr>
 </table>
-  <!-- Results: {{ results }} -->
+  Results: {{ results }}
 </div>

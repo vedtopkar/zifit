@@ -53,6 +53,8 @@ router.post('/nuclease', function(req, res){
     if(options.require_5G){
         // Strip out the candidates that don't meet some criteria
         results = filterForLeadingG(results);
+    } else if(options.require_5GG) {
+        results = filterForLeadingGG(results);
     }
 
     results.error = false;
@@ -176,6 +178,19 @@ function filterForLeadingG(seqs){
     var results = [];
     for(var i = 0; i < length; i++){
         if(seqs[i].seq[0] == 'G'){
+            results.push(seqs[i]);
+        }
+    }
+    return results;
+}
+
+// Takes an array of sequence objects and returns an array of sequence objects that satisfy
+// the criteria of having a leading G
+function filterForLeadingGG(seqs){
+    var length = seqs.length;
+    var results = [];
+    for(var i = 0; i < length; i++){
+        if(seqs[i].seq.substring(0,2) == 'GG'){
             results.push(seqs[i]);
         }
     }

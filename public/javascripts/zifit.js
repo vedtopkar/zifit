@@ -3,7 +3,7 @@
         .controller('submitFormController', ['$scope', '$http', '$location', function($scope, $http, $location, ngTableParams){
             $scope.data = { gRNA_length: 20,
                             PAM_sequence: 'NGG',
-                            options: {require_5G: false}
+                            options: {require_5G: false, require_5GG: false}
                           };
             $scope.results = {};
 
